@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torneo Blood Strike</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f0f0f;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .neon {
+            color: #0ff;
+            font-weight: bold;
+            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff;
+            animation: blink 1s infinite alternate;
+            text-align: center;
+            font-size: 20px;
+        }
+        @keyframes blink {
+            from { opacity: 1; }
+            to { opacity: 0.3; }
+        }
+        .neon-icon {
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 5px #0ff) drop-shadow(0 0 10px #0ff);
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+        .neon-icon:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px #22d3ee) drop-shadow(0 0 15px #22d3ee);
+        }
+        .progress-bar-inner {
+            transition: width 0.1s;
+        }
+        .terms-modal {
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        .terms-content {
+            max-height: 70vh;
+            scrollbar-width: thin;
+            scrollbar-color: #22d3ee #1a1a1a;
+        }
+        .terms-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .terms-content::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 10px;
+        }
+        .terms-content::-webkit-scrollbar-thumb {
+            background-color: #22d3ee;
+            border-radius: 10px;
+        }
+        .accept-btn {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+        .accept-btn:hover {
+            background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.8);
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(34, 211, 238, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+            }
+        }
+        .admin-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .registros-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .registros-table th, .registros-table td {
+            border: 1px solid #374151;
+            padding: 8px;
+            text-align: left;
+        }
+        .registros-table th {
+            background-color: #1f2937;
+            color: white;
+        }
+        .registros-table tr:nth-child(even) {
+            background-color: #1f2937;
+        }
+        .registros-table tr:hover {
+            background-color: #374151;
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- Admin Link -->
+    <a href="#admin" id="adminBtn" class="admin-link bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-all">
+        <i class="fas fa-user-shield mr-2"></i> Admin
+    </a>
+
+    <!-- Terms Modal (shown by default) -->
+    <div id="terms-modal" class="terms-modal fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden">
+            <div class="bg-gradient-to-r from-cyan-600 to-blue-600 p-5 text-white">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl md:text-3xl font-bold">
+                        <i class="fas fa-file-contract mr-3"></i> Términos y Condiciones del Torneo
+                    </h2>
+                    <div class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+                <p class="mt-2 text-blue-100">Debes aceptar para participar en el torneo</p>
+            </div>
+            
+            <div class="terms-content p-6 text-gray-300 overflow-y-auto">
+                <div class="bg-gray-800 p-4 rounded-lg mb-4">
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="accept-terms" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
+                        </div>
+                        <label for="accept-terms" class="ml-2 text-sm font-medium text-gray-300">
+                            He leído y acepto los términos y condiciones del torneo Blood Strike FONZY
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <ol class="list-decimal pl-5 space-y-3">
+                        <li><strong>Información General:</strong> El torneo es organizado por Fonzy_Game y no está afiliado a los desarrolladores oficiales de Blood Strike.</li>
+                        <li><strong>Requisitos para Participar:</strong> Ser mayor de edad o contar con permiso de padres, tener cuenta activa en Blood Strike, seguir nuestras redes, completar el formulario, y aceptar estos términos.</li>
+                        <li><strong>Inscripción:</strong> Fase 1: Formulario web. Fase 2: Confirmación por redes y pago.</li>
+                        <li><strong>Medios de Pago:</strong> PayPal o transferencias. Costo: 1 dólar.</li>
+                        <li><strong>Dinámica del Torneo:</strong> Se juega en salas privadas, con ID y contraseña enviadas por email tras el pago.</li>
+                        <li><strong>Recompensas:</strong> 1 kill = $1, 2 kills = $2, hasta 16 kills = $16.</li>
+                        <li><strong>Comportamiento:</strong> Prohibido hacer trampa o compartir accesos. Se expulsa al que incumpla.</li>
+                        <li><strong>Responsabilidad:</strong> No nos hacemos responsables por fallos técnicos o errores en datos.</li>
+                        <li><strong>Reembolsos:</strong> Solo si el evento se cancela por culpa de la organización.</li>
+                        <li><strong>Modificaciones:</strong> Nos reservamos el derecho a modificar estos términos y se avisará por redes.</li>
+                        <li><strong>Aceptación:</strong> Al preinscribirse y pagar, aceptás todo lo anterior.</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="bg-gray-800 px-6 py-4 flex justify-end border-t border-gray-700">
+                <button id="accept-btn" disabled class="accept-btn px-6 py-2 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center pulse">
+                    Aceptar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content (hidden until terms accepted) -->
+    <div id="main-content" class="hidden px-4 py-6 max-w-6xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-amber-400 mb-2">Torneo de Blood Strike</h1>
+        <div class="neon">¡Ganarás en dólares!</div>
+        <h2 class="text-xl md:text-2xl text-center text-cyan-400 mt-4 mb-8">Fonzy_Game</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <!-- Left Column -->
+            <div class="space-y-6">
+                <section class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <details>
+                        <summary class="text-xl font-bold text-amber-400 cursor-pointer flex items-center">
+                            <i class="fas fa-file-contract mr-2"></i> Términos y Condiciones
+                        </summary>
+                        <div class="mt-4 text-gray-300 space-y-3">
+                            <p><strong>Recuerda:</strong> Ya aceptaste nuestros términos al entrar. Si necesitas revisarlos nuevamente, puedes hacerlo aquí.</p>
+                        </div>
+                    </details>
+                </section>
+
+                <section class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h2 class="text-xl font-bold text-cyan-400 mb-4">Fase 1: Preinscripción</h2>
+                    <p class="text-gray-300 mb-4">Debes llenar la siguiente información y luego darle al botón <strong class="text-green-400">"Preinscribirse"</strong>.</p>
+                    <div class="space-y-4">
+                        <input type="text" id="nombre" placeholder="Nombre en Blood Strike (obligatorio)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                        <input type="text" id="userId" placeholder="ID de jugador (obligatorio)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                        <input type="email" id="correo" placeholder="Correo electrónico (obligatorio)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                        <input type="text" id="instagram" placeholder="Instagram (obligatorio)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                        <button id="preinscribirseBtn" onclick="preinscribirse()" class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors">
+                            Preinscribirse <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <div id="progressBar" class="w-full bg-gray-700 rounded-full h-4 hidden">
+                            <div id="progressBarInner" class="bg-gradient-to-r from-green-500 to-cyan-500 h-4 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <div id="mensajeExito" class="hidden bg-green-900 text-green-100 p-4 rounded-lg flex items-center">
+                            <i class="fas fa-check-circle mr-2 text-green-300"></i>
+                            ¡Te has preinscrito exitosamente!
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-6">
+                <section class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h2 class="text-xl font-bold text-cyan-400 mb-4">Fase 2: Confirmación</h2>
+                    <div class="text-gray-300 space-y-3">
+                        <p>En la segunda semana no harás nada. Nosotros te contactaremos y deberás enviarnos el comprobante de que nos sigues en <strong class="text-amber-400">TikTok</strong> y <strong class="text-amber-400">YouTube</strong>.</p>
+                        <p>Luego te enviaremos los medios de pago disponibles (<strong class="text-green-400">1 dollar</strong>, preferiblemente <strong class="text-blue-400">PayPal o Dollarapp</strong>).</p>
+                        <p>Apenas recibamos tu pago, te enviaremos en qué torneo quedaste (torneo 1 o torneo 2).</p>
+                        <p>Proceso siguiente: en el stream realizado en TikTok y Kick te enviaremos por correo la contraseña y el ID de la sala. Si hay problemas técnicos, te pedimos tenernos paciencia.</p>
+                    </div>
+                </section>
+
+                <section class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h2 class="text-xl font-bold text-cyan-400 mb-4">Recompensas</h2>
+                    <div class="text-gray-300 space-y-3">
+                        <p>Después del torneo, <strong class="text-amber-400">al finalizar el stream</strong>, cada jugador que haya hecho al menos una kill recibirá su respectiva recompensa. Es decir:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Si haces 1 kill, te devolvemos el dólar de tu inscripción.</li>
+                            <li>Si haces 2 kills, te enviamos 2 dólares.</li>
+                            <li>Si haces 3 kills, te enviamos 3 dólares.</li>
+                            <li>... así sucesivamente ...</li>
+                            <li>Si haces 16 kills, te llevarás 16 dólares (recuperas tu dólar y ganas 15 más).</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h2 class="text-xl font-bold text-cyan-400 mb-4">Consejos</h2>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-2">
+                        <li>LEE LOS TERMINOS Y CONDICIONES.</li>
+                        <li>Preferiblemente usa PayPal o DollarApp como medio de pago.</li>
+                        <li>Revisa nuestras redes sociales (TikTok e Instagram) donde estaremos dando información y respondiendo preguntas.</li>
+                        <li>Verifica que tengas acceso a tu cuenta Gmail para recibir el ID y contraseña el día del torneo.</li>
+                        <li>Practica desde ya para ser el mejor y ganar más dinero.</li>
+                        <li>Verifica que los datos enviados sean correctos.</li>
+                        <li>Si no completas los pasos o no contestas en 12 horas, se anula tu preinscripción.</li>
+                        <li>No intentes engañar con el pago.</li>
+                        <li>No compartas ID y contraseña con otros, serás expulsado.</li>
+                        <li>Ten paciencia, tu recompensa está asegurada.</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <p class="text-gray-300 mb-4">Si deseas ganar más dinero con esto, apoya el contenido y seguiremos haciendo estos torneos.</p>
+            <p class="text-amber-400 font-bold mb-4">¡Próximamente: Batallas de Escuadrones!</p>
+            <p class="text-red-400 font-bold">¡Apúrate! Los cupos son limitados y se llenan rápido (máximo 120 preinscripciones).</p>
+        </div>
+
+        <div class="flex justify-center space-x-8 mt-8">
+            <a href="https://www.youtube.com/@FonzyGame" target="_blank" class="hover:scale-110 transition-transform">
+                <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube" class="neon-icon">
+            </a>
+            <a href="https://www.tiktok.com/@fonzy_game?is_from_webapp=1&sender_device=pc" target="_blank" class="hover:scale-110 transition-transform">
+                <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" class="neon-icon">
+            </a>
+            <a href="https://x.com/Fonzy_Game" target="_blank" class="hover:scale-110 transition-transform">
+                <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" class="neon-icon">
+            </a>
+            <a href="https://www.instagram.com/Fonzy_game" target="_blank" class="hover:scale-110 transition-transform">
+                <img src="https://cdn-icons-png.flaticon.com/512/1384/1384063.png" alt="Instagram" class="neon-icon">
+            </a>
+        </div>
+
+        <footer class="text-center text-gray-500 text-sm mt-8">
+            Evento no oficial de Blood Strike<br>
+            2025
+        </footer>
+    </div>
+
+    <!-- Admin Panel (hidden by default) -->
+    <div id="admin-panel" class="hidden px-4 py-6 max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl md:text-3xl font-bold text-amber-400">
+                <i class="fas fa-user-shield mr-2"></i> Panel de Administración
+            </h2>
+            <button onclick="toggleAdminPanel()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                <i class="fas fa-times mr-2"></i> Cerrar
+            </button>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 mb-6">
+            <div class="flex flex-wrap gap-4">
+                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    <i class="fas fa-file-excel mr-2"></i> Exportar a Excel
+                </button>
+                <button onclick="sendEmailToAll()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    <i class="fas fa-envelope mr-2"></i> Enviar Email a Todos
+                </button>
+                <button onclick="clearRegistros()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    <i class="fas fa-trash-alt mr-2"></i> Limpiar Registros
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+            <h3 class="text-xl font-bold text-cyan-400 mb-4">
+                <i class="fas fa-users mr-2"></i> Registros de Participantes
+                <span id="registros-count" class="ml-2 text-sm bg-blue-600 text-white px-2 py-1 rounded-full">0</span>
+            </h3>
+            
+            <div class="overflow-x-auto">
+                <table class="registros-table w-full">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>ID Jugador</th>
+                            <th>Correo</th>
+                            <th>Instagram</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registros-body">
+                        <!-- Aquí se cargarán los registros dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Almacenamiento de registros en localStorage
+        const REGISTROS_KEY = 'bloodstrike_registros';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const acceptCheckbox = document.getElementById('accept-terms');
+            const acceptBtn = document.getElementById('accept-btn');
+            const termsModal = document.getElementById('terms-modal');
+            const mainContent = document.getElementById('main-content');
+            const adminBtn = document.getElementById('adminBtn');
+            
+            // Checkbox event listener
+            acceptCheckbox.addEventListener('change', function() {
+                acceptBtn.disabled = !this.checked;
+            });
+            
+            // Accept button
+            acceptBtn.addEventListener('click', function() {
+                termsModal.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                // Store acceptance in localStorage
+                localStorage.setItem('termsAccepted', 'true');
+            });
+            
+            // Check if terms were previously accepted
+            if(localStorage.getItem('termsAccepted') === 'true') {
+                termsModal.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+            }
+            
+            // Admin button
+            adminBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleAdminPanel();
+            });
+            
+            // Cargar registros existentes
+            loadRegistros();
+        });
+
+        function toggleAdminPanel() {
+            const mainContent = document.getElementById('main-content');
+            const adminPanel = document.getElementById('admin-panel');
+            
+            if(adminPanel.classList.contains('hidden')) {
+                mainContent.classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+            } else {
+                mainContent.classList.remove('hidden');
+                adminPanel.classList.add('hidden');
+            }
+        }
+
+        function loadRegistros() {
+            const registros = getRegistros();
+            const tbody = document.getElementById('registros-body');
+            const countElement = document.getElementById('registros-count');
+            
+            tbody.innerHTML = '';
+            countElement.textContent = registros.length;
+            
+            if(registros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-400">No hay registros aún</td></tr>';
+                return;
+            }
+            
+            registros.forEach((registro, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${registro.nombre}</td>
+                    <td>${registro.userId}</td>
+                    <td>${registro.correo}</td>
+                    <td>${registro.instagram}</td>
+                    <td>${new Date(registro.fecha).toLocaleString()}</td>
+                    <td>
+                        <button onclick="deleteRegistro(${index})" class="text-red-400 hover:text-red-300 mr-2" title="Eliminar">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button onclick="sendEmail('${registro.correo}')" class="text-blue-400 hover:text-blue-300" title="Enviar Email">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getRegistros() {
+            const registrosStr = localStorage.getItem(REGISTROS_KEY);
+            return registrosStr ? JSON.parse(registrosStr) : [];
+        }
+
+        function saveRegistros(registros) {
+            localStorage.setItem(REGISTROS_KEY, JSON.stringify(registros));
+        }
+
+        function addRegistro(nombre, userId, correo, instagram) {
+            const registros = getRegistros();
+            const nuevoRegistro = {
+                nombre,
+                userId,
+                correo,
+                instagram,
+                fecha: new Date().toISOString()
+            };
+            registros.push(nuevoRegistro);
+            saveRegistros(registros);
+            loadRegistros();
+        }
+
+        function deleteRegistro(index) {
+            if(confirm('¿Estás seguro de eliminar este registro?')) {
+                const registros = getRegistros();
+                registros.splice(index, 1);
+                saveRegistros(registros);
+                loadRegistros();
+            }
+        }
+
+        function clearRegistros() {
+            if(confirm('¿Estás seguro de eliminar TODOS los registros? Esta acción no se puede deshacer.')) {
+                localStorage.removeItem(REGISTROS_KEY);
+                loadRegistros();
+            }
+        }
+
+        function exportToExcel() {
+            const registros = getRegistros();
+            if(registros.length === 0) {
+                alert('No hay registros para exportar');
+                return;
+            }
+            
+            // Preparar datos para Excel
+            const datos = registros.map(reg => ({
+                'Nombre': reg.nombre,
+                'ID Jugador': reg.userId,
+                'Correo Electrónico': reg.correo,
+                'Instagram': reg.instagram,
+                'Fecha de Registro': new Date(reg.fecha).toLocaleString()
+            }));
+            
+            // Crear libro de Excel
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(datos);
+            XLSX.utils.book_append_sheet(wb, ws, "Registros Torneo");
+            
+            // Exportar
+            XLSX.writeFile(wb, `Registros_Torneo_BloodStrike_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        function sendEmail(email) {
+            // Esto es solo un ejemplo, en producción necesitarías un backend
+            alert(`Enviar email a: ${email}\n\nEsta función requiere integración con un servicio de email como SendGrid o Mailchimp.`);
+        }
+
+        function sendEmailToAll() {
+            const registros = getRegistros();
+            if(registros.length === 0) {
+                alert('No hay registros para enviar emails');
+                return;
+            }
+            
+            const emails = registros.map(reg => reg.correo).join(', ');
+            alert(`Enviar email a todos los participantes:\n\n${emails}\n\nEsta función requiere integración con un servicio de email como SendGrid o Mailchimp.`);
+        }
+
+        function preinscribirse() {
+            const nombre = document.getElementById("nombre").value.trim();
+            const userId = document.getElementById("userId").value.trim();
+            const correo = document.getElementById("correo").value.trim();
+            const instagram = document.getElementById("instagram").value.trim();
+
+            if (!nombre || !userId || !correo || !instagram) {
+                alert("Por favor, completa todos los campos obligatorios.");
+                return;
+            }
+
+            const progressBar = document.getElementById("progressBar");
+            const progressBarInner = document.getElementById("progressBarInner");
+            const mensajeExito = document.getElementById("mensajeExito");
+            const preinscribirseBtn = document.getElementById("preinscribirseBtn");
+
+            preinscribirseBtn.disabled = true;
+            progressBar.classList.remove("hidden");
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBarInner.style.width = progress + "%";
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    mensajeExito.classList.remove("hidden");
+                    mensajeExito.classList.add("flex");
+                    
+                    // Guardar el registro
+                    addRegistro(nombre, userId, correo, instagram);
+                    
+                    setTimeout(() => {
+                        // Reset form
+                        document.getElementById("nombre").value = "";
+                        document.getElementById("userId").value = "";
+                        document.getElementById("correo").value = "";
+                        document.getElementById("instagram").value = "";
+                        
+                        progressBarInner.style.width = "0%";
+                        progressBar.classList.add("hidden");
+                        mensajeExito.classList.add("hidden");
+                        mensajeExito.classList.remove("flex");
+                        preinscribirseBtn.disabled = false;
+                    }, 3000);
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
