@@ -1,138 +1,166 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torneo Blood Strike ALFREDITOLOPEZITO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0f0f0f;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-        .neon {
-            color: #0ff;
-            font-weight: bold;
-            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff;
-            animation: blink 1s infinite alternate;
-            text-align: center;
-            font-size: 20px;
-        }
-        @keyframes blink {
-            from { opacity: 1; }
-            to { opacity: 0.3; }
-        }
-        .neon-icon {
-            width: 50px;
-            height: 50px;
-            filter: drop-shadow(0 0 5px #0ff) drop-shadow(0 0 10px #0ff);
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-        .neon-icon:hover {
-            transform: scale(1.1);
-            filter: drop-shadow(0 0 8px #22d3ee) drop-shadow(0 0 15px #22d3ee);
-        }
-        .progress-bar-inner {
-            transition: width 0.1s;
-        }
-        /* Estilo para el scrollbar en los términos y condiciones */
-        .terms-scrollbar::-webkit-scrollbar {
-            width: 8px;
-        }
-        .terms-scrollbar::-webkit-scrollbar-track {
-            background: #2d3748; /* gray-700 */
-            border-radius: 10px;
-        }
-        .terms-scrollbar::-webkit-scrollbar-thumb {
-            background: #4a5568; /* gray-600 */
-            border-radius: 10px;
-        }
-        .terms-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #718096; /* gray-500 */
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Feliz Cumple Señorita</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #ffe6f0, #fff5fa);
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Corazones */
+    .corazon {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #ff4d88;
+      transform: rotate(45deg);
+      animation: flotar 10s linear infinite;
+      z-index: 0;
+    }
+
+    .corazon::before,
+    .corazon::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #ff4d88;
+      border-radius: 50%;
+    }
+
+    .corazon::before {
+      top: -10px;
+      left: 0;
+    }
+
+    .corazon::after {
+      left: -10px;
+      top: 0;
+    }
+
+    @keyframes flotar {
+      0% {
+        bottom: -10%;
+        left: calc(100% * var(--pos));
+        opacity: 1;
+      }
+      100% {
+        bottom: 110%;
+        left: calc(100% * var(--pos) + 20px);
+        opacity: 0;
+      }
+    }
+
+    /* Sobre/Carta cerrada */
+    .sobre {
+      width: 300px;
+      height: 200px;
+      background: #ff4d88;
+      margin: 100px auto;
+      position: relative;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.5s ease;
+      z-index: 10;
+    }
+
+    .sobre::before, .sobre::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    .sobre::before {
+      border-width: 0 150px 100px 150px;
+      border-color: transparent transparent #fff5fa transparent;
+      top: -100px;
+      left: 0;
+    }
+
+    .mensaje {
+      display: none;
+      max-width: 700px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      color: #d6004c;
+      animation: aparecer 1s ease-in-out forwards;
+      white-space: pre-wrap;
+      z-index: 10;
+      position: relative;
+    }
+
+    @keyframes aparecer {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .visible {
+      display: block;
+    }
+
+    .mensaje h1 {
+      font-size: 2.2em;
+      margin-bottom: 10px;
+    }
+
+    .mensaje p {
+      font-size: 1.15em;
+      line-height: 1.8;
+    }
+  </style>
 </head>
 <body>
-    <div class="px-4 py-6 max-w-6xl mx-auto">
-        <h1 class="text-3xl md:text-4xl font-bold text-center text-amber-400 mb-2">Torneo de Blood Strike</h1>
-        <div class="neon">¡Ganarás en dólares!</div>
-        <h2 class="text-xl md:text-2xl text-center text-cyan-400 mt-4 mb-8">Fonzy_Game</h2>
 
-        <div id="mainContentContainer">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                <div class="space-y-6">
-                    <section class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h2 class="text-xl font-bold text-cyan-400 mb-4">¿Que debes hacer?</h2>
-                        <div class="text-gray-300 space-y-3">
-                            <p>El 26 de mayo se abrira el formulario en esta pagina para que llenes con la informacion que nececitamos para llevar a cabo que participes en el evento.</p>
-                            <p>Hasta el 1 de junio tienes plazo a la preincripcion, luego de esa fecha no se acepta</p>
-                            <p>Al acabarse el tiempo de preincripcion llevaremos a cabo la inscripcion donde nosotros te contactaremos y deberás enviarnos el comprobante de que nos sigues en <strong class="text-amber-400">TikTok</strong> y <strong class="text-amber-400">YouTube</strong> Esto hazta el 6 de junio.</p>
-                            <p>Luego te enviaremos los medios de pago disponibles (<strong class="text-green-400">1 dollar</strong>, preferiblemente (<strong class="text-blue-400">PayPal, Dollarapp</strong> u otros <strong class="text-blue-400"> medios</strong> si eres de <strong class="text-yellow-500">col<strong class="text-blue-500">om</strong><strong class="text-red-500">bia</strong></strong>).</p>
-                            <p style="color: #fff;">Apenas recibamos tu pago, te enviaremos en qué torneo quedaste (torneo 1 o torneo 2).</p>
-                            <p style="color: #fff;">Proceso siguiente: en el stream realizado en TikTok y Kick el 7 y 8 de junio a las 4pm hora colombia te enviaremos por correo la contraseña y el ID de la sala. Si hay problemas técnicos, te pedimos tenernos paciencia.</p>
-                        </div>
-                    </section>
-                    <section class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h2 class="text-xl font-bold text-cyan-400 mb-4">Recompensas</h2>
-                        <div class="text-gray-300 space-y-3">
-                            <p>Después del torneo, <strong class="text-amber-400">al finalizar el stream</strong>, cada jugador que haya hecho al menos una kill recibirá su respectiva recompensa. Es decir:</p>
-                            <ul class="list-disc pl-5 space-y-2">
-                                <li>Si haces 1 kill, te devolvemos el dólar de tu inscripción.</li>
-                                <li>Si haces 2 kills, te enviamos 2 dólares.</li>
-                                <li>Si haces 3 kills, te enviamos 3 dólares.</li>
-                                <li>... así sucesivamente ...</li>
-                                <li>Si haces 16 kills, te llevarás 16 dólares (recuperas tu dólar y ganas 15 más).</li>
-                                <li>Pagaremos a los 3 mejores <strong class="text-blue-400">clips</strong> del torneo.</li>
-                            </ul>
-                        </div>
-                    </section>
-                    <section class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h2 class="text-xl font-bold text-cyan-400 mb-4">Consejos</h2>
-                        <ul class="list-disc pl-5 text-gray-300 space-y-2">
-                            <li>Preferiblemente usa PayPal o DollarApp como medio de pago.</li>
-                            <li>Revisa nuestras redes sociales (TikTok e Instagram) donde estaremos dando información y respondiendo preguntas.</li>
-                            <li>Verifica que tengas acceso a tu cuenta Gmail para recibir el ID y contraseña el día del torneo.</li>
-                            <li>Practica desde ya para ser el mejor y ganar más dinero.</li>
-                            <li>Verifica que los datos enviados sean correctos.</li>
-                            <li>Si no completas los pasos o no contestas en 12 horas, se anula tu preinscripción.</li>
-                            <li>No intentes engañar con el pago.</li>
-                            <li>No compartas ID y contraseña con otros, serás expulsado.</li>
-                            <li>Ten paciencia, tu recompensa está asegurada.</li>
-                        </ul>
-                    </section>
-                </div>
-            </div>
-            <div class="mt-8 text-center">
-                <p class="text-gray-300 mb-4">Si deseas ganar más dinero con esto, apoya el contenido y seguiremos haciendo estos torneos.</p>
-                <p class="text-amber-400 font-bold mb-4">¡Próximamente: Batallas de Escuadrones!</p>
-                <p class="text-red-600 font-bold">¡Apúrate! Los cupos son limitados y se llenan rápido (máximo 120 preinscripciones).</p>
-            </div>
-            <div class="flex justify-center space-x-8 mt-8">
-                <a href="https://www.youtube.com/@FonzyGame" target="_blank" class="hover:scale-110 transition-transform">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube" class="neon-icon">
-                </a>
-                <a href="https://www.tiktok.com/@fonzy_game?is_from_webapp=1&sender_device=pc" target="_blank" class="hover:scale-110 transition-transform">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" class="neon-icon">
-                </a>
-                <a href="https://x.com/Fonzy_Game" target="_blank" class="hover:scale-110 transition-transform">
-                    <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" class="neon-icon">
-                </a>
-                <a href="https://www.instagram.com/Fonzy_game" target="_blank" class="hover:scale-110 transition-transform">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384063.png" alt="Instagram" class="neon-icon">
-                </a>
-            </div>
-            <footer class="text-center text-gray-500 text-sm mt-8">
-                Evento no oficial de Blood Strike<br>
-                2025
-            </footer>
-        </div>
-    </div>
-</body>
-</html>
+  <!-- Corazones flotantes -->
+  <script>
+    for (let i = 0; i < 40; i++) {
+      let heart = document.createElement('div');
+      heart.classList.add('corazon');
+      heart.style.setProperty('--pos', Math.random());
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.animationDuration = 8 + Math.random() * 5 + 's';
+      document.body.appendChild(heart);
+    }
+  </script>
+
+  <!-- Carta cerrada -->
+  <div class="sobre" onclick="abrirCarta()" title="Haz clic para abrir tu carta de cumpleaños"></div>
+
+  <!-- Mensaje escondido -->
+  <div id="mensaje" class="mensaje">
+    <h1>🎉 Feliz Cumpleaños señorita mia 🎂</h1>
+    <p>
+Feliz cumpleaños mi señorita, solo mía, mía, hermosa mujer, la que Dios me ha regalado en estas últimas semanas que hemos hablado y compartido tiempo y hemos hablado mucho, que me hace reír con todo lo que dice, que me hace muy feliz con todo lo que hace, que está haciendo que el amor que hay dentro de mí salga y solo se lo dé a una persona, y eres tú, amor mío.
+
+Feliz cumpleaños, Dios te bendiga, te guarde siempre siempre, que todo lo que quieras llegar a cumplir se cumpla con la voluntad de Dios, que le pido que me dé tiempo para compartir y vivir lo que queramos juntos. Apenas esto empieza entre los dos y quiero más que nada que seas feliz.
+
+Amor, espero que hoy, aunque te toque las fotos jajaja, te vaya súper bien, tengas un día de muchos regalos... ¡muchosss! Que la pases súper bien hoy con los que más amas.
+
+Ti amo muchooo mucho.
+De tu señorito para ti:
+Feliz cumpleaños, mi señorita amada. 💖
+    </p>
+  </div>
+
+  <script>
+    function abrirCarta() {
+      document.querySelector('.sobre').style.display = 'none';
+      document.getElementById('mensaje').classList.add('visible');
+    }
+  </script>
+
 </body>
 </html>
